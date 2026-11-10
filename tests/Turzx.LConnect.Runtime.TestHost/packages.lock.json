@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETFramework,Version=v4.8": {
+      "Lib.Harmony": {
+        "type": "Transitive",
+        "resolved": "2.4.3",
+        "contentHash": "dxBbWOlFdzJNGIlkf3Q5/QdTZFzt2uPYCAfGA12D5HW6uBX+tiT0rVUW0upYI6Nlj2rfkHcO6jyoiNcoEpxCTw=="
+      },
+      "Mono.Cecil": {
+        "type": "Transitive",
+        "resolved": "0.11.6",
+        "contentHash": "f33RkDtZO8VlGXCtmQIviOtxgnUdym9xx/b1p9h91CRGOsJFxCFOFK1FDbVt1OCf1aWwYejUFa2MOQyFWTFjbA=="
+      },
+      "turzx.lconnect.bootstrap": {
+        "type": "Project"
+      },
+      "turzx.lconnect.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "Lib.Harmony": "[2.4.3, 2.4.3]",
+          "Mono.Cecil": "[0.11.6, 0.11.6]"
+        }
+      }
+    },
+    ".NETFramework,Version=v4.8/win-x64": {}
+  }
+}

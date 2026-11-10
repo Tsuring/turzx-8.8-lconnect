@@ -73,12 +73,42 @@ Verified on 2026-11-10 using Windows, .NET SDK 10.0.202, and Mono.Cecil 0.11.6.
 
 The CLI uses deferred Cecil metadata reading, avoiding eager resolution of unrelated .NET Framework/WPF custom attributes in a modern .NET host. Vendor binaries used for these checks are not included in this repository.
 
-## Runtime DLL loading: proposed, not implemented
+## Automatic runtime DLL loading
 
 The inspected L-Connect service is an x64 .NET Framework 4.8 managed application. .NET Framework supports loading a custom `AppDomainManager` assembly when the default application domain starts, using application configuration or process-scoped startup settings. See the [Microsoft configuration reference](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/appdomainmanagerassembly-element).
 
-An isolated .NET Framework console probe successfully loaded a separate manager DLL before `Main` in a 64-bit process. This confirms the generic startup-loading mechanism; it does not establish successful runtime patching of L-Connect.
+The implemented bootstrap has no third-party dependencies. It preserves the verified hosts' `.NETFramework,Version=v4.8` compatibility policy before loading dependencies and registers an `AssemblyLoad` handler for the entry assembly. The CLR loads that assembly itself; the handler initializes the runtime before application `Main`. Loading the entry executable manually during `InitializeNewDomain` was reproduced to cause `FileLoadException` / `E_UNEXPECTED` at startup. Allowing early dependency loading to cache legacy framework policy also caused HWiNFO XML parsing to request a missing external DTD. Both cases were corrected and checked.
 
-A future loader could apply the PID recognition changes and OpenRGB guard in memory while keeping vendor binaries on disk unchanged. It would need to run before device discovery, handle static initialization correctly, and retain code-identity checks. Settings would be limited to the intended L-Connect processes.
+`Turzx.LConnect.Runtime` validates the original inputs and uses Harmony 2.4.3 for two initializer transpilers, an OpenRGB callback prefix, and a read-only sensor-frame observation postfix. Harmony can initialize a type while preparing its hook, so the two data-only initializers are deliberately replayed after patch installation. Replaying Core rebuilds forward and reverse mappings. The SDK initializer assigns only VID/PID constants. A normalized fingerprint covers the initializer graph, local USB ID behavior, and LCD static data construction:
 
-This repository currently implements offline inspection and copy generation only. A runtime compatibility loader has not been implemented or tested inside L-Connect. Existing working installations continue to use the previously verified file patches.
+```text
+4EC87B42798662F95B3049315A4688139389C133F5CA4FEE0D2150F0089C77DF
+```
+
+The loader refuses already patched vendor inputs. On failure it removes its hooks, attempts each registry reset independently, and checks that no owned hooks remain. Bootstrap resolver handlers are detached on failure. An incomplete rollback is treated as unsafe startup.
+
+The protected runtime directory contains our DLLs and restored NuGet dependencies. Our bootstrap DLL also resides beside the two executables, whose application configurations select the custom manager. No vendor binary, device firmware, USB descriptor, or system-wide startup variable is changed by the runtime loader. Local startup/update maintenance validates payload hashes and repairs only our bootstrap and the two startup configurations. It waits for an update to settle and leaves unsupported vendor versions unpatched.
+
+## Runtime loader validation
+
+Verified on Windows on 2026-11-10 with L-Connect 3 2.1.29.0 and lcd207 SDK 1.4.0.146:
+
+| Check | Result |
+| --- | --- |
+| Release build | Zero warnings and errors. |
+| Isolated original-assembly startup | Hooks ready before `Main`; PID `0088` in Core and SDK; reverse lookup correct; input file hashes unchanged. |
+| Original callback with an LCD without RGB | Callback skipped without opening a USB device. |
+| Deliberate failure after Core replay | Hooks removed; both registries restored to original PID `A088`. |
+| Framework compatibility | net48 policy retained; XML with an absent external DTD parses using the normal default resolver behavior. |
+| Startup configuration fixtures | Existing settings/binding redirects preserved; repeated merge unchanged; byte-exact recovery; unrelated manager rejected. |
+| Live service and UI | Both automatically loaded the compatibility code; all three vendor file hashes match originals. |
+| Theme and sensors | Theme applied; a rendered sensor bitmap contained nonzero CPU/GPU readings; UI readings changed; physical display/theme and updating sensors confirmed by its owner. |
+| OpenRGB | Six physical controllers including four RAM modules; L-Connect required indexes 0 through 9 all available; `ApplyResult=True` and `Init success`. |
+| Startup/update maintenance | Old binary-replacement action replaced with startup-integration maintenance; post-reboot heartbeat reports Ready. An actual future vendor update remains untested. |
+| Full Windows reboot | Service and UI automatically loaded the hooks; original vendor hashes retained; theme applied and nonzero sensor frame rendered; OpenRGB detected all four RAM controllers and applied lighting with no missing indexes; TURZX process absent. Owner reported normal operation. |
+
+The six physical OpenRGB controllers comprise four RAM modules, one GPU, and one motherboard. L-Connect adds four native controller bridges, bringing its combined list to ten entries. All required indexes `0..9` were available after reboot. The original-file hash check and startup logs were collected from the new post-reboot processes, rather than reused from the earlier service restart.
+
+An actual future L-Connect update remains outside the verified results. The local maintenance integration is configured to recheck compatibility and restore startup entries, but this does not guarantee compatibility with an untested vendor release.
+
+The display has no separate RGB controller, so its unsupported lighting-firmware/effect messages can still appear. The runtime skips that display during OpenRGB registration; it does not manufacture lighting hardware.

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>Turzx.LConnect.Runtime</AssemblyName>
+    <Version>0.2.0</Version>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="[2.4.3]" />
+    <PackageReference Include="Mono.Cecil" Version="[0.11.6]" />
+    <Compile Include="..\LianLiTurzxCompat\PatchPlanner.cs" Link="Validation\PatchPlanner.cs" />
+    <Compile Include="..\LianLiTurzxCompat\OpenRgbGuard.cs" Link="Validation\OpenRgbGuard.cs" />
+    <Compile Include="..\LianLiTurzxCompat\ApprovedBaseline.cs" Link="Validation\ApprovedBaseline.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>Turzx.LConnect.Runtime.TestHost</AssemblyName>
+    <Version>0.2.0</Version>
+    <PlatformTarget>x64</PlatformTarget>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Turzx.LConnect.Bootstrap\Turzx.LConnect.Bootstrap.csproj" />
+    <ProjectReference Include="..\..\src\Turzx.LConnect.Runtime\Turzx.LConnect.Runtime.csproj" />
+  </ItemGroup>
+</Project>
