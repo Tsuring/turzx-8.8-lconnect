@@ -1,0 +1,30 @@
+# Local operations, machine-specific state and deployment helpers
+.local/
+AGENTS.md
+AGENTS.override.md
+**/AGENTS.md
+**/AGENTS.override.md
+**/DEPLOYMENT*.md
+*.ps1
+.env*
+verification.json
+
+# Vendor binaries, original backups and generated patches
+*.dll
+*.exe
+*.pdb
+*.zip
+*.7z
+compatibility/
+recovery-originals/
+automation/
+
+# .NET build outputs and editor state
+**/bin/
+**/obj/
+artifacts/
+.vs/
+.vscode/
+*.user
+*.suo
+*.log
